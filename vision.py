@@ -73,6 +73,9 @@ class GripPipeline():
         out = cv2.cvtColor(input, cv2.COLOR_BGR2HSV)
         return cv2.inRange(out, (hue[0], sat[0], val[0]),  (hue[1], sat[1], val[1]))
 
+    # if we determine the BlurType can we get rid of this whole if tree? 
+    # or maybe prioritize the default one to the top?
+    # the same can be said about a lot of the other things
     @staticmethod
     def __blur(src, type, radius):
         if(type is BlurType.Box_Blur):
@@ -103,22 +106,26 @@ class GripPipeline():
                         min_ratio, max_ratio):
         output = []
         for contour in input_contours:
+
             x,y,w,h = cv2.boundingRect(contour)
             if (w < min_width or w > max_width):
                 continue
             if (h < min_height or h > max_height):
                 continue
+
             area = cv2.contourArea(contour)
             if (area < min_area):
                 continue
             if (cv2.arcLength(contour, True) < min_perimeter):
                 continue
+
             hull = cv2.convexHull(contour)
             solid = 100 * area / cv2.contourArea(hull)
             if (solid < solidity[0] or solid > solidity[1]):
                 continue
             if (len(contour) < min_vertex_count or len(contour) > max_vertex_count):
                 continue
+            
             ratio = (float)(w) / h
             if (ratio < min_ratio or ratio > max_ratio):
                 continue
@@ -166,6 +173,7 @@ def main():
         have_frame, frame = cap.read()
         if have_frame:
             new_frame = cv2.resize(frame, (285, 160))
+            # should we be processing new_frame?
             pipeline.process(frame)
             extra_processing(pipeline, sd)
 
