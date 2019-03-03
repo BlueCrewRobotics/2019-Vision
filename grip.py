@@ -46,10 +46,9 @@ class VTapeOffsetDetection:
 
         # find the angle of each line
         print("Agles of all lines")
-        x = 0
-        while(x < len(self.find_lines_output)):
-            print(int(self.find_lines_output[x].angle()))
-            x += 1
+        for x in self.find_lines_output:
+            print(int(x.angle()))
+
 
         
 
@@ -72,6 +71,7 @@ class VTapeOffsetDetection:
         print("Center Line: ", centerLine)
         midPoint = int((xValues[0] + xValues[1]) / 2)
         print("Midpoint of tape:", midPoint)
+        return midPoint - centerLine
 
     
 
@@ -101,13 +101,11 @@ class VTapeOffsetDetection:
             return numpy.sqrt(pow(self.x2 - self.x1, 2) + pow(self.y2 - self.y1, 2))
 
         def angle(self):
-            return (math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
-            '''
+            # return (math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
             degree = numpy.abs(math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
             if(degree > 90):
                 return 180 - degree
             return degree
-            '''
             
     @staticmethod
     def __find_lines(input):
