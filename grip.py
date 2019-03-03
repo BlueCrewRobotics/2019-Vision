@@ -125,9 +125,20 @@ class GripPipeline:
 
 if(__name__=="__main__"):
     image = cv2.imread("photo.jpg")
+    imgHeight, imgWidth, imgChannels = image.shape
+    centerLine = imgWidth/2
     pipeline = GripPipeline()
     x, y = pipeline.process(image)
+    print("x data for each blob:")
     print(x)
+    print("y data for each blob:")
     print(y)
+
+    midPoint = int((x[0] + x[1]) / 2)
+    print("Midpoint of tape:", midPoint)
+
+    offset = centerLine - midPoint
+    print("Offset from center:", offset)
+
 
 
