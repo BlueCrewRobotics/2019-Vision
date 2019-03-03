@@ -137,7 +137,7 @@ if(__name__=="__main__"):
     midPoint = int((x[0] + x[1]) / 2)
     print("Midpoint of tape:", midPoint)
 
-    offset = centerLine - midPoint
+    offset = midPoint - centerLine 
     print("Offset from center:", offset)
 
 
