@@ -37,6 +37,8 @@ class VTapeOffsetDetection:
         self.__rgb_threshold_input = source0
         (self.rgb_threshold_output) = self.__rgb_threshold(self.__rgb_threshold_input, self.__rgb_threshold_red, self.__rgb_threshold_green, self.__rgb_threshold_blue)
         
+        # Runs these two different functions in parallel?
+
         # Step Find Lines:
         self.find_lines_output = self.__find_lines(self.rgb_threshold_output)
         
@@ -102,9 +104,11 @@ class VTapeOffsetDetection:
 
         def angle(self):
             # return (math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
-            degree = numpy.abs(math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
+            degree = math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1))
             if(degree > 90):
                 return 180 - degree
+            if(degree < -90):
+                return -180 - degree
             return degree
             
     @staticmethod
