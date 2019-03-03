@@ -14,7 +14,7 @@ class VTapeOffsetDetection:
 
         self.__rgb_threshold_red = [236.19604316546764, 255.0]
         self.__rgb_threshold_green = [236.19604316546764, 255.0]
-        self.__rgb_threshold_blue = [240.55305755395685, 255.0]
+        self.__rgb_threshold_blue = [234.55305755395685, 255.0]
 
         self.rgb_threshold_output = None
 
@@ -28,6 +28,7 @@ class VTapeOffsetDetection:
         self.find_contours_output = None
 
 
+    # returns the offset from center
     def process(self, source0):
         """
         Runs the pipeline and sets all outputs to new values.
@@ -35,14 +36,24 @@ class VTapeOffsetDetection:
         # Step RGB_Threshold0:
         self.__rgb_threshold_input = source0
         (self.rgb_threshold_output) = self.__rgb_threshold(self.__rgb_threshold_input, self.__rgb_threshold_red, self.__rgb_threshold_green, self.__rgb_threshold_blue)
-
-        # Step Find_Lines0:
-        self.__find_lines_input = self.rgb_threshold_output
-        (self.find_lines_output) = self.__find_lines(self.__find_lines_input)
-
+        
+        # Step Find Lines:
+        self.find_lines_output = self.__find_lines(self.rgb_threshold_output)
+        
         # Step Find_Contours0:
         self.__find_contours_input = self.rgb_threshold_output
         (self.find_contours_output) = self.__find_contours(self.__find_contours_input, self.__find_contours_external_only)
+
+        # find the angle of each line
+        print("Agles of all lines")
+        x = 0
+        while(x < len(self.find_lines_output)):
+            print(int(self.find_lines_output[x].angle()))
+            x += 1
+
+        
+
+        # finds the centers of each line
         xValues = []
         yValues = []
         for c in self.find_contours_output:
@@ -62,8 +73,6 @@ class VTapeOffsetDetection:
         midPoint = int((xValues[0] + xValues[1]) / 2)
         print("Midpoint of tape:", midPoint)
 
-        offset = midPoint - centerLine 
-        return offset 
     
 
     @staticmethod
@@ -92,7 +101,14 @@ class VTapeOffsetDetection:
             return numpy.sqrt(pow(self.x2 - self.x1, 2) + pow(self.y2 - self.y1, 2))
 
         def angle(self):
-            return math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1))
+            return (math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
+            '''
+            degree = numpy.abs(math.degrees(math.atan2(self.y2 - self.y1, self.x2 - self.x1)))
+            if(degree > 90):
+                return 180 - degree
+            return degree
+            '''
+            
     @staticmethod
     def __find_lines(input):
         """Finds all line segments in an image.
@@ -102,15 +118,11 @@ class VTapeOffsetDetection:
             A filtered list of Lines.
         """
         detector = cv2.createLineSegmentDetector()
-        if (len(input.shape) == 2 or input.shape[2] == 1):
-            lines = detector.detect(input)
-            output = []
-        else:
-            tmp = cv2.cvtColor(input, cv2.COLOR_BGR2GRAY)
-            lines = detector.detect(tmp)
-            output = []
+        lines = detector.detect(input)
+        output = []
+        
         if len(lines) != 0:
-            for i in range(1, len(lines[0])):
+            for i in range(0, len(lines[0])):
                 tmp = VTapeOffsetDetection.Line(lines[0][i, 0][0], lines[0][i, 0][1],
                                         lines[0][i, 0][2], lines[0][i, 0][3])
                 output.append(tmp)
