@@ -1,3 +1,4 @@
+from networktables import NetworkTables 
 import cv2
 import numpy
 import math
@@ -12,8 +13,8 @@ class VTapeOffsetDetection:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__rgb_threshold_red = [236.19604316546764, 255.0]
-        self.__rgb_threshold_green = [236.19604316546764, 255.0]
+        self.__rgb_threshold_red = [161, 218.0]
+        self.__rgb_threshold_green = [197, 255.0]
         self.__rgb_threshold_blue = [234.55305755395685, 255.0]
 
         self.rgb_threshold_output = None
@@ -40,40 +41,47 @@ class VTapeOffsetDetection:
         # Runs these two different functions in parallel?
 
         # Step Find Lines:
-        self.find_lines_output = self.__find_lines(self.rgb_threshold_output)
+        #self.find_lines_output = self.__find_lines(self.rgb_threshold_output)
         
         # Step Find_Contours0:
         self.__find_contours_input = self.rgb_threshold_output
         (self.find_contours_output) = self.__find_contours(self.__find_contours_input, self.__find_contours_external_only)
 
         # find the angle of each line
+        '''
         print("Agles of all lines")
         for x in self.find_lines_output:
             print(int(x.angle()))
+        '''
 
-
-        
 
         # finds the centers of each line
         xValues = []
         yValues = []
         for c in self.find_contours_output:
             M = cv2.moments(c)
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
-            xValues.append(cX)
-            yValues.append(cY)
+            try:
+                cX = int(M["m10"] / M["m00"])
+                cY = int(M["m01"] / M["m00"])
+                xValues.append(cX)
+                yValues.append(cY)
+            except:
+                pass
         imgHeight, imgWidth, imgChannels = source0.shape
         centerLine = imgWidth/2
+        '''
         print("x data for each blob:")
         print(xValues)
         print("y data for each blob:")
         print(yValues)
+        '''
 
         print("Center Line: ", centerLine)
-        midPoint = int((xValues[0] + xValues[1]) / 2)
-        print("Midpoint of tape:", midPoint)
-        return midPoint - centerLine
+        if(len(xValues) > 0):
+            midPoint = int((xValues[0] + xValues[1]) / 2)
+            print("Midpoint of tape:", midPoint)
+            return midPoint - centerLine
+        return 0
 
     
 
@@ -123,11 +131,13 @@ class VTapeOffsetDetection:
         lines = detector.detect(input)
         output = []
         
-        if len(lines) != 0:
+        try:
             for i in range(0, len(lines[0])):
                 tmp = VTapeOffsetDetection.Line(lines[0][i, 0][0], lines[0][i, 0][1],
                                         lines[0][i, 0][2], lines[0][i, 0][3])
                 output.append(tmp)
+        except:
+            pass
         return output
 
     @staticmethod
@@ -144,8 +154,25 @@ class VTapeOffsetDetection:
         else:
             mode = cv2.RETR_LIST
             method = cv2.CHAIN_APPROX_SIMPLE
-            contours, hierarchy =cv2.findContours(input, mode=mode, method=method)
+            contours, hierarchy, _=cv2.findContours(input, mode=mode, method=method)
         return contours
 
+if (__name__=="__main__"):
 
+    print("beginning of vision code")
+    NetworkTables.initialize(server="roborio-6153-frc.local")
+    sd = NetworkTables.getTable("SmartDashboard")
+    cap = cv2.VideoCapture(0)
+    pipeline = VTapeOffsetDetection()
 
+    while(cap.isOpened()):
+        sd.putNumber("testNumner", 4)
+        have_frame, frame = cap.read()
+        if(have_frame):
+            sd.putNumber("Vtape_Offset", pipeline.process(frame))
+    
+    '''
+    image = cv2.imread("photo.jpg")
+    offset = VTapeOffsetDetection()
+    print(offset.process(image))
+    '''
