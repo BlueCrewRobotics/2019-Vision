@@ -32,13 +32,12 @@ class GripPipeline:
         self.find_blobs_output = None
 
 
-    def process(self, source0):
+    def process(self, source0, width):
         """
         Runs the pipeline and sets all outputs to new values.
         """
         
-        imgHeight, imgWidth, imgChannels = source0.shape
-        centerLine = imgWidth/2
+        centerLine = width/2
 
         # Step HSL_Threshold0:
         self.__hsl_threshold_input = source0
@@ -121,9 +120,10 @@ if (__name__=="__main__"):
     pipeline = GripPipeline()
 
     while(cap.isOpened()):
-        sd.putNumber("testNumner", 4)
         have_frame, frame = cap.read()
-        offset = pipeline.process(frame)
+        imgHeight, imgWidth, imgChannels = frame.shape 
+        offset = pipeline.process(frame, imgWidth)
         print(offset)
         sd.putNumber("VTape_Offset", offset)
+        sd.putNumber("cameraWidth", imgWidth)
  
