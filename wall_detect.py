@@ -13,9 +13,9 @@ class GripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsl_threshold_hue = [0.0, 167.77589134125637]
-        self.__hsl_threshold_saturation = [0.0, 255.0]
-        self.__hsl_threshold_luminance = [128.41726618705036, 255.0]
+        self.__hsl_threshold_hue = [68.0, 90]
+        self.__hsl_threshold_saturation = [126, 255.0]
+        self.__hsl_threshold_luminance = [83, 255]
 
         self.hsl_threshold_output = None
 
@@ -55,6 +55,7 @@ class GripPipeline:
         xValues = []
         for blob in self.find_blobs_output:
             xValues.append(blob.pt[0])
+        print(xValues)
 
         return centerLine - ((xValues[0] + xValues[1]) / 2)
 
@@ -122,7 +123,7 @@ if (__name__=="__main__"):
     while(cap.isOpened()):
         have_frame, frame = cap.read()
         imgHeight, imgWidth, imgChannels = frame.shape 
-        offset = pipeline.process(frame, imgWidth)
+        offset = pipeline.process(frame, 120)
         print(offset)
         sd.putNumber("VTape_Offset", offset)
         sd.putNumber("cameraWidth", imgWidth)
