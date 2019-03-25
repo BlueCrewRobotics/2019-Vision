@@ -56,6 +56,9 @@ class GripPipeline:
         for blob in self.find_blobs_output:
             xValues.append(blob.pt[0])
         print(xValues)
+        # if it only detects 1 then do nothing 
+        if(len(xValues) < 2):
+            return 0
 
         return centerLine - ((xValues[0] + xValues[1]) / 2)
 
